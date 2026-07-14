@@ -206,6 +206,7 @@
 
 var DATA = null;          // 현재 매뉴얼 데이터
 var selectedId = null;    // 선택된 항목 id
+var autoPick = true;      // 현재 선택이 '자동 선택'인지 (직접 클릭하면 false → 자동 선택이 덮어쓰지 않음)
 var editingId = null;     // 편집 중인 항목 id (null이면 새 항목)
 var dirty = false;        // 저장 안 된 변경이 있는지
 var dataSha = null;       // GitHub 파일 버전(sha) - 저장할 때 필요
@@ -270,8 +271,6 @@ function renderLeft(){
       (text ? '일치하는 키워드가 없습니다.<br>아래 전체 목록에서 찾아보세요.' : '증상을 입력하면 관련 키워드가 여기에 표시됩니다.') + '</div>';
   } else {
     found.forEach(function(e){ dBox.appendChild(kwButton(e, true)); });
-    // 감지된 키워드가 1개면 자동으로 열어줌 (빠른 응대)
-    if (found.length >= 1 && !found.some(function(e){ return e.id === selectedId; })) selectEntry(found[0].id);
   }
 
   var q = document.getElementById('kwSearch').value.trim();
@@ -297,12 +296,15 @@ function kwButton(e, detected){
   var b = document.createElement('button');
   b.className = 'kwBtn' + (detected ? ' detected' : '') + (e.id === selectedId ? ' selected' : '');
   b.innerHTML = escapeHtml(e.keyword) + '<span class="kwCat">' + escapeHtml(e.category || '') + '</span>';
-  b.onclick = function(){ selectEntry(e.id); };
+  b.onclick = function(){ selectEntry(e.id, false); }; // 직접 클릭 = 수동 선택
   return b;
 }
 
-/* ── 오른쪽 매뉴얼 내용 그리기 ── */
-function selectEntry(id){
+/* ── 오른쪽 매뉴얼 내용 그리기 ──
+   isAuto=true : 증상 입력에 의한 자동 선택
+   isAuto=false: 사용자가 직접 클릭 → 이후 자동 선택이 덮어쓰지 않음 */
+function selectEntry(id, isAuto){
+  autoPick = !!isAuto;
   selectedId = id;
   var e = DATA.entries.find(function(x){ return x.id === id; });
   if (!e) return;
@@ -514,10 +516,22 @@ document.querySelectorAll('nav button').forEach(function(b){
 
 /* ── 초기화 ── */
 function renderAll(){ renderLeft(); renderEntryList(); }
-document.getElementById('symptomInput').addEventListener('input', renderLeft);
+/* 증상 입력 시: 목록 갱신 + 감지된 키워드 자동 열기
+   (단, 사용자가 직접 다른 키워드를 클릭한 상태면 자동 선택이 덮어쓰지 않음) */
+document.getElementById('symptomInput').addEventListener('input', function(){
+  renderLeft();
+  var found = detectEntries(this.value);
+  var selectedIsDetected = found.some(function(e){ return e.id === selectedId; });
+  if (found.length > 0 && (selectedId === null || autoPick) && !selectedIsDetected){
+    selectEntry(found[0].id, true);
+  }
+});
 document.getElementById('kwSearch').addEventListener('input', renderLeft);
 document.getElementById('clearBtn').onclick = function(){
-  document.getElementById('symptomInput').value = ''; renderLeft(); document.getElementById('symptomInput').focus();
+  document.getElementById('symptomInput').value = '';
+  autoPick = true; // 새 환자 응대 시작 → 다음 입력부터 다시 자동 선택 허용
+  renderLeft();
+  document.getElementById('symptomInput').focus();
 };
 // 저장된 내 정보/저장소 표시
 document.getElementById('editorName').value  = localStorage.getItem('cm_name')  || '';
