@@ -110,7 +110,7 @@
       <div class="paneTitle">🔍 감지된 키워드</div>
       <div id="detectedBox"><div style="padding:4px 4px 8px; font-size:13px; color:var(--muted);">증상을 입력하면 관련 키워드가 여기에 표시됩니다.</div></div>
       <div class="paneTitle">전체 키워드</div>
-      <input id="kwSearch" type="text" placeholder="키워드 검색...">
+      <input id="kwSearch" type="search" placeholder="키워드 검색..." autocomplete="off" name="manual-kw-search">
       <div id="allKwBox"></div>
     </div>
     <div id="rightPane">
@@ -128,8 +128,8 @@
       <div class="card">
         <h3>1. 내 정보 (수정하려면 필수)</h3>
         <p class="hint">이름은 수정 기록에 남습니다. 접근 토큰은 관리자에게 받은 공용 토큰을 입력하세요. 이 정보는 <b>이 컴퓨터에만</b> 저장됩니다.</p>
-        <div class="frow"><label>이름</label><input id="editorName" placeholder="예) 홍길동"></div>
-        <div class="frow"><label>접근 토큰</label><input id="editorToken" type="password" placeholder="github_pat_ 로 시작하는 공용 토큰"></div>
+        <div class="frow"><label>이름</label><input id="editorName" placeholder="예) 홍길동" autocomplete="off"></div>
+        <div class="frow"><label>접근 토큰</label><input id="editorToken" type="password" placeholder="github_pat_ 로 시작하는 공용 토큰" autocomplete="new-password"></div>
         <button class="btn primary" onclick="saveProfile()">내 정보 저장</button>
       </div>
 
