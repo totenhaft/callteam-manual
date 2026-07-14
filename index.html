@@ -58,6 +58,13 @@
 
   /* 설정/기록 페이지 공통 */
   .page{flex:1; overflow-y:auto; padding:26px 34px; max-width:900px;}
+  .page.wide{max-width:none;}
+  /* 설정: 좌(목록)/우(편집 폼) 2단 배치 */
+  .settingCols{display:flex; gap:20px; align-items:flex-start;}
+  .colLeft{flex:0 0 430px; max-width:430px; min-width:0;}
+  .colRight{flex:1; min-width:0; position:sticky; top:14px;}
+  #editorPlaceholder{border:2px dashed var(--border); border-radius:10px; padding:60px 20px; text-align:center; color:var(--muted); font-size:14px; line-height:1.9; background:transparent;}
+  @media (max-width:1000px){ .settingCols{flex-direction:column;} .colLeft{flex:auto; max-width:none; width:100%;} .colRight{position:static; width:100%;} }
   .page h2{font-size:20px; margin-bottom:14px;}
   .card{background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px 20px; margin-bottom:16px;}
   .card h3{font-size:15px; margin-bottom:10px; color:var(--blue-dark);}
@@ -65,7 +72,7 @@
   .frow{display:flex; gap:10px; margin-bottom:8px; align-items:center; flex-wrap:wrap;}
   .frow label{width:110px; font-size:13px; font-weight:700;}
   .frow input, .frow select{flex:1; min-width:200px; padding:8px 10px; border:1px solid var(--border); border-radius:6px; font-size:14px;}
-  textarea{width:100%; min-height:220px; padding:10px; border:1px solid var(--border); border-radius:6px; font-size:14px; font-family:inherit; line-height:1.7;}
+  textarea{width:100%; min-height:340px; padding:10px; border:1px solid var(--border); border-radius:6px; font-size:14px; font-family:inherit; line-height:1.7;}
   .btn{padding:9px 18px; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:700;}
   .btn.primary{background:var(--blue); color:#fff;}
   .btn.gray{background:#e2e8f0; color:var(--text);}
@@ -121,10 +128,12 @@
 
   <!-- ── 탭 2: 설정 ── -->
   <div id="settingTab" class="tabpage">
-    <div class="page">
+    <div class="page wide">
       <h2>⚙️ 설정</h2>
       <div id="dirtyBadge">⚠️ 저장되지 않은 변경사항이 있습니다. 아래 <b>[GitHub에 저장]</b> 버튼을 눌러야 모두에게 반영됩니다.</div>
 
+      <div class="settingCols">
+      <div class="colLeft">
       <div class="card">
         <h3>1. 내 정보 (수정하려면 필수)</h3>
         <p class="hint">이름은 수정 기록에 남습니다. 접근 토큰은 관리자에게 받은 공용 토큰을 입력하세요. 이 정보는 <b>이 컴퓨터에만</b> 저장됩니다.</p>
@@ -140,6 +149,23 @@
         <div style="margin-top:10px;"><button class="btn gray" onclick="openEditor(null)">+ 새 항목 추가</button></div>
       </div>
 
+      <div class="card">
+        <h3>3. GitHub에 저장 (모두에게 반영)</h3>
+        <p class="hint">저장하면 팀 전체가 새 내용을 보게 되며, 누가 언제 수정했는지 '수정 기록' 탭에 자동으로 남습니다.</p>
+        <button class="btn primary" id="commitBtn" onclick="commitData()">💾 GitHub에 저장</button>
+        <span id="commitStatus" style="font-size:13px; margin-left:10px; color:var(--muted);"></span>
+      </div>
+
+      <div class="card">
+        <h3>4. 저장소 연결 정보</h3>
+        <p class="hint">보통 자동으로 인식되므로 바꿀 필요가 없습니다. 화면 주소가 github.io가 아닐 때만 직접 입력하세요.</p>
+        <div class="frow"><label>저장소</label><input id="repoOverride" placeholder="예) 사용자명/callteam-manual"><button class="btn gray" onclick="saveRepoOverride()">저장</button></div>
+        <p class="hint" id="repoStatus"></p>
+      </div>
+      </div><!-- /colLeft -->
+
+      <div class="colRight">
+      <div id="editorPlaceholder">✏️<br>왼쪽 <b>매뉴얼 항목 관리</b>에서 [편집]을 누르거나<br>[+ 새 항목 추가]를 누르면 여기에 편집 화면이 나타납니다.</div>
       <div class="card" id="editorCard" style="display:none;">
         <h3 id="editorTitle">항목 편집</h3>
         <div class="frow"><label>키워드</label><input id="fKeyword" placeholder="예) 발열"></div>
@@ -154,20 +180,8 @@
           <button class="btn red" id="deleteBtn" onclick="deleteEntry()">이 항목 삭제</button>
         </div>
       </div>
-
-      <div class="card">
-        <h3>3. GitHub에 저장 (모두에게 반영)</h3>
-        <p class="hint">저장하면 팀 전체가 새 내용을 보게 되며, 누가 언제 수정했는지 '수정 기록' 탭에 자동으로 남습니다.</p>
-        <button class="btn primary" id="commitBtn" onclick="commitData()">💾 GitHub에 저장</button>
-        <span id="commitStatus" style="font-size:13px; margin-left:10px; color:var(--muted);"></span>
-      </div>
-
-      <div class="card">
-        <h3>4. 저장소 연결 정보</h3>
-        <p class="hint">보통 자동으로 인식되므로 바꿀 필요가 없습니다. 화면 주소가 github.io가 아닐 때만 직접 입력하세요.</p>
-        <div class="frow"><label>저장소</label><input id="repoOverride" placeholder="예) 사용자명/callteam-manual"><button class="btn gray" onclick="saveRepoOverride()">저장</button></div>
-        <p class="hint" id="repoStatus"></p>
-      </div>
+      </div><!-- /colRight -->
+      </div><!-- /settingCols -->
     </div>
   </div>
 
@@ -358,6 +372,7 @@ function openEditor(id){
   editingId = id;
   var card = document.getElementById('editorCard');
   card.style.display = 'block';
+  document.getElementById('editorPlaceholder').style.display = 'none';
   var e = id ? DATA.entries.find(function(x){ return x.id === id; }) : null;
   document.getElementById('editorTitle').textContent = e ? '항목 편집: ' + e.keyword : '새 항목 추가';
   document.getElementById('fKeyword').value  = e ? e.keyword : '';
@@ -367,7 +382,11 @@ function openEditor(id){
   document.getElementById('deleteBtn').style.display = e ? 'inline-block' : 'none';
   card.scrollIntoView({behavior:'smooth'});
 }
-function closeEditor(){ document.getElementById('editorCard').style.display = 'none'; editingId = null; }
+function closeEditor(){
+  document.getElementById('editorCard').style.display = 'none';
+  document.getElementById('editorPlaceholder').style.display = 'block';
+  editingId = null;
+}
 
 function applyEntry(){
   var kw = document.getElementById('fKeyword').value.trim();
